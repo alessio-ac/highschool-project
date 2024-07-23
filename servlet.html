@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Esami - Java Servlet</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rubik">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+  <script>hljs.initLineNumbersOnLoad();</script>
+  <script src="nav.js"></script>
+  <script src="tabs.js"></script>
+
+</head>
+<body>
+  <h1>Alessio Cucinotta</h1>
+    <div id="navbarContainer"></div>
+
+    <div style="width: 70em; font-size: 1em">
+      <h2 style="color:black; border-bottom: 1px solid #000000; text-align: left;">Codifica DES utilizzando una Java Servlet</h2>
+      Questa Servlet prende un messaggio tramite un form HTML e lo codifica utilizzando l'algoritmo DES. 
+      In output viene mandato sia il messaggio codificato, che la chiave per decodificarlo, entrambi in base esadecimale.
+      <p>
+      &Egrave possibile verificare il corretto funzionamento di questo programma tramite un <a href="https://the-x.cn/en-US/cryptography/Des.aspx">sito web esterno</a> che pu&ograve decodificare la stringa.
+      <p>
+      Per visualizzare il contenuto dei file si pu&ograve utilizzare la nav bar sottostante.
+      </div> <p>
+
+    <div class="tabs">
+      <button class="tab-button" onclick="openTab(event, 'index')">index.html</button>
+      <button class="tab-button" onclick="openTab(event, 'web')">web.xml</button>
+      <button class="tab-button" onclick="openTab(event, 'java')">codificaDES.java</button>
+    </div>
+
+    <div class="tab-content" id="index">
+      <figure>
+        <figcaption>index.html</figcaption>
+          <pre class="html"><code>  &lthtml&gt
+    &lthead&gt
+      &lttitle&gtCodificatore DES&lt/title&gt
+    &lt/head&gt
+    &ltbody&gt
+      &lth1&gtCodificatore DES utilizzando JSP&lt/h1&gt
+      &ltp&gt&lta href="servlet/codificaDES"&gtPer eseguire la servlet clicca qui!&lt/a&gt&lt/p&gt
+    &lt/body&gt
+  &lt/html&gt
+          </code></pre>
+      </figure>
+    </div>
+
+    <div class="tab-content" id="web">
+      <figure>
+        <figcaption>web.xml</figcaption>
+          <pre class="xml"><code>  &lt?xml version="1.0" encoding="ISO-8859-1"?&gt
+  &ltweb-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5"&gt
+
+    &ltdisplay-name&gtCodificatroe DES&lt/display-name&gt
+    &ltdescription&gtCodificatore pratico di una stringa tramite Servlet&lt/description&gt
+
+    &ltservlet&gt
+        &ltservlet-name&gtcodificaDES&lt/servlet-name&gt
+        &ltservlet-class&gtcodificaDES&lt/servlet-class&gt
+      &lt/servlet&gt
+    
+    &ltservlet-mapping&gt
+          &ltservlet-name&gtcodificaDES&lt/servlet-name&gt
+          &lturl-pattern&gt/servlet/codificaDES&lt/url-pattern&gt
+    &lt/servlet-mapping&gt
+    
+  &lt/web-app&gt            
+          </code></pre>
+      </figure>
+    </div>
+
+    <div class="tab-content" id="java">
+      <figure>
+        <figcaption>codificaDES.java</figcaption>
+          <pre class="java"><code>  import javax.crypto.*;
+  import javax.crypto.spec.*;
+  import java.security.*;
+  import javax.servlet.ServletException;
+  import javax.servlet.annotation.WebServlet;
+  import javax.servlet.http.HttpServlet;
+  import javax.servlet.http.HttpServletRequest;
+  import javax.servlet.http.HttpServletResponse;
+  import java.io.IOException;
+  import java.io.PrintWriter;
+  import org.apache.commons.codec.binary.Hex;
+
+  public class codificaDES extends HttpServlet {
+      protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+          response.setContentType("text/html");
+          PrintWriter out = response.getWriter();
+
+          out.println("&lthtml&gt");
+          out.println("&lthead&gt&lttitle&gtCodificatore DES&lt/title&gt&lt/head&gt");
+          out.println("&ltbody&gt");
+          out.println("&lth1&gtCodificatore DES utilizzando JSP&lt/h1&gt");
+          out.println("&ltform method=\"post\"&gt");
+          out.println("Inserisci il messaggio da cifrare:");
+          out.println("&ltinput type='text' name='message'&gt");
+          out.println("&ltinput type='submit' value='Invia'&gt");
+          out.println("&lt/form&gt");
+          out.println("&lt/body&gt&lt/html&gt");
+      }
+
+      protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+          response.setContentType("text/html");
+          PrintWriter out = response.getWriter();
+
+          String message = request.getParameter("message");
+
+          try {
+              // Genera la chiave DES
+              KeyGenerator myGenerator = KeyGenerator.getInstance("DES");
+              SecretKey myKey = myGenerator.generateKey();
+
+              // Crea algoritmo cifrario
+              Cipher myCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+              
+              // Imposta modalit&agrave encrypt con la chiave gnerata
+              myCipher.init(Cipher.ENCRYPT_MODE, myKey);
+
+              // Otteniamo un array di byte dal messaggio del form poich&egrave DES lavora con i byte
+              byte[] messageByte = message.getBytes();
+              
+              // Crittografiamo l'array di byte con il nostro cifrario
+              byte[] encryptedBytes = myCipher.doFinal(messageByte);
+
+              // Convertiamo la nostra chiave ed il messaggio cifrato in esadecimale
+              String encodedKey = Hex.encodeHexString(myKey.getEncoded());
+              String encodedMessage = Hex.encodeHexString(encryptedBytes);
+
+              out.println("&lthtml&gt");
+              out.println("&lthead&gt&lttitle&gtCodificatore DES&lt/title&gt&lt/head&gt");
+              out.println("&ltbody&gt");
+              out.println("&lth1&gtCodificatore DES utilizzando JSP&lt/h1&gt");
+              out.println("&ltp&gt&ltstrong&gtMessaggio crittografato:&lt/strong&gt " + encodedMessage + "&lt/p&gt");
+              out.println("&ltp&gt&ltstrong&gtChiave:&lt/strong&gt " + encodedKey + "&lt/p&gt");
+              out.println("&lt/body&gt&lt/html&gt");
+
+          } catch (NoSuchAlgorithmException e) {
+              e.printStackTrace();
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+
+      }
+  }            
+          </code></pre>
+      </figure>
+    </div>
+
+</body>
+</html>

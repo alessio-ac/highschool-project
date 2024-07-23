@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Esami - Database</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rubik">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script src="nav.js"></script>
+  <script src="tabs.js"></script>
+</head>
+<body>
+    <h1>Alessio Cucinotta</h1>
+    <div id="navbarContainer"></div>
+
+    <div class="tabs">
+      <button class="tab-button" onclick="openTab(event, 'richiesta')">Richiesta</button>
+      <button class="tab-button" onclick="openTab(event, 'analisi')">Analisi</button>
+      <button class="tab-button" onclick="openTab(event, 'codice')">Codice SQL</button>
+      <button class="tab-button" onclick="openTab(event, 'query')">Query</button>
+    </div>
+
+    <div style="width: 55em; font-size: 1em; line-height: 1.4;" class="tab-content" id="richiesta">
+      <h2 style="color:black; border-bottom: 1px solid #000000; text-align: left;">Richiesta da seguire</h2>
+      Descrivere e realizzare un db per la gestione di una biblioteca, considerando che gli utenti possano prelevare dei libri,
+      tenerli per un cesto periodo di tempo e poi riconsegnarli. Effettuare le seguenti query:
+      <ul>
+        <li>Tutti i libri prestati ad un utente specifico in ordine cronologico.</li>
+        <li>Individua i primi tre lettori che hanno letto pi&ugrave; libri.</li>
+        <li>Individua tutti i possessori dei libri non ancora rientrati e il titolo degli stessi.</li>
+        <li>Dare lo storico dei libri chiesi in prestito da un utente indicando il periodo.</li>
+        <li>Fai la classifica dei libri maggiormente prestati.</li>
+        <li>Individua prestiti la cui durata supera i 15gg.</li>
+      </ul>
+     </div>
+
+     <div style="width: 55em; font-size: 1em; line-height: 1.4;" class="tab-content" id="analisi">
+      <h2 style="color:black; border-bottom: 1px solid #000000; text-align: left;">Analis&igrave; della realt&agrave;</h2>
+      Il Database in oggetto presenta la realt&agrave; di una biblioteca nella quale sono presneti degli oggetti riconoscibili
+      attraverso la lettura del testo. I libri presenti nella bilbioteca potranno esssere prelevati dagli utenti, i quali
+      potranno tenerli per una certa quantit&agrave; di tempo, per poi successivamente riconsegnarli alla struttura. Dall'analisi si
+      possono quindi dedurre le seguenti entit&agrave;:</p>
+      <ol id="bkmrk-libro-titolo-autore-">
+        <li>Libro
+          <ul>
+            <li>Titolo</li>
+            <li>Autore</li>
+          </ul>
+        </li>
+        <li>Cliente
+          <ul>
+            <li>Nome</li>
+            <li>Cognome</li>
+          </ul>
+        </li>
+      </ol>
+      <p id="bkmrk-dalla-lettura-delle-">Dalla lettura delle richieste possiamo notare che le due entit&agrave; avranno una relazione
+        molti-a-molti per quanto riguarda il prestito, che non dipende da nessuno dei due oggetti. Conoscendo questa relazione
+        quindi, poissiamo aggiungere alla lista delle entit&agrave; la tabella:</p>
+      <ol start="3" id="bkmrk-prestito">
+        <li>Prestito</li>
+      </ol>
+      La quale terr&agrave; traccia delle date di inizio e fine prestito di ogni libro, con annesso l'ID del cliente.
+      Con queste tre tabelle otteniamo lo schema E/R:<br>
+      <img src="assets/er.png" width="500px">
+      <br><br><br><br><br><br>
+     </div>
+
+    <div class="tab-content" id="codice">
+      <pre>
+          <code>
+          CREATE TABLE Libro (
+              idLibro int(11) AUTO_INCREMENT,
+              Titolo varchar(50) NOT NULL,
+              Autore varchar(50),
+              PRIMARY KEY (idLibro)
+          );
+          
+          CREATE TABLE Cliente (
+              idCliente int(11) AUTO_INCREMENT,
+              Nome varchar(50) NOT NULL,
+              Cognome varchar(50) NOT NULL,
+              PRIMARY KEY (idCliente)
+          );
+          
+          CREATE TABLE Prestito (
+              idPrestito int(11) AUTO_INCREMENT,
+              idLibroP int(11),
+              idClienteP int(11),
+              dataInizio date NOT NULL,
+              dataFine date,
+              PRIMARY KEY (idPrestito),
+              FOREIGN KEY (idLibroP) REFERENCES Libro(idLibro)
+                  ON DELETE SET NULL
+                  ON UPDATE CASCADE,
+              FOREIGN KEY (idClienteP) REFERENCES Cliente(idCliente)
+                  ON DELETE SET NULL
+                  ON UPDATE CASCADE
+          );
+          
+          -- INSERT INTO Libro(Titolo, Autore) VALUES ("The Hobbit", "J. R. R. Tolkien");
+          -- INSERT INTO Cliente(Nome, Cognome) VALUES ("Alessio", "Cucinotta");
+          -- INSERT INTO Prestito(idLibroP, idClienteP, dataInizio, dataFine) VALUES (1, 1 , '2023-04-25', '2023-05-07');
+          
+          INSERT INTO Libro (Titolo, Autore) VALUES
+          ('Il nome della rosa', 'Umberto Eco'),
+          ('1984', 'George Orwell'),
+          ('Il signore degli anelli', 'J.R.R. Tolkien'),
+          ('Il giovane Holden', 'J.D. Salinger'),
+          ('Lolita', 'Vladimir Nabokov'),
+          ('Orgoglio e pregiudizio', 'Jane Austen'),
+          ('Il processo', 'Franz Kafka'),
+          ('Moby Dick', 'Herman Melville'),
+          ('La divina commedia', 'Dante Alighieri'),
+          ('Guerra e pace', 'Lev Tolstoj');
+          
+          INSERT INTO Cliente (Nome, Cognome) VALUES
+          ('Mario', 'Rossi'),
+          ('Luca', 'Bianchi'),
+          ('Paolo', 'Verdi'),
+          ('Giuseppe', 'Neri'),
+          ('Marta', 'Gialli'),
+          ('Sara', 'Viola'),
+          ('Carla', 'Arancioni'),
+          ('Giovanni', 'Rosa'),
+          ('Elena', 'Celesti'),
+          ('Roberto', 'Marroni');
+          
+          INSERT INTO Prestito (idLibroP, idClienteP, dataInizio, dataFine) VALUES
+          (1, 2, '2022-01-01', '2022-02-01'),
+          (2, 3, '2022-01-02', '2022-02-02'),
+          (3, 4, '2022-01-03', '2022-02-03'),
+          (4, 5, '2022-01-04', '2022-02-04'),
+          (5, 6, '2022-01-05', '2022-02-05'),
+          (6, 7, '2022-01-06', '2022-02-06'),
+          (7, 8, '2022-01-07', '2022-02-07'),
+          (8, 9, '2022-01-08', '2022-02-08'),
+          (9, 10, '2022-01-09', '2022-02-09'),
+          (10, 1, '2022-01-10', '2022-02-10');
+          </code>
+        </pre>
+    </div>
+
+    <div class="tab-content" id="query">
+      <figure>
+        <figcaption>Tutti i libri prestati ad un utente specifico in ordine cronologico.</figcaption>
+          <pre class="sql"><code>    
+              SELECT Libro.Titolo, Prestito.dataInizio, Prestito.dataFine
+              FROM Libro, Cliente, Prestito
+              WHERE Libro.idLibro = Prestito.idLibroP
+              AND Cliente.idCliente = Prestito.idClienteP
+              AND Cliente.Nome = "Alessio"
+              AND Cliente.Cognome = "Cucinotta"
+              ORDER BY Prestito.dataInizio;             
+          </code></pre>
+      </figure>
+      <br>
+      <figure>
+        <figcaption>Individua i primi tre lettori che hanno letto pi&ugrave; libri.</figcaption>
+          <pre class="sql"><code>    
+            SELECT Cliente.Nome, Cliente.Cognome, COUNT(Prestito.idClienteP) AS Totale
+            FROM Libro, Cliente, Prestito
+            WHERE Libro.idLibro = Prestito.idLibroP
+            AND Cliente.idCliente = Prestito.idClienteP
+            GROUP BY Cliente.Cognome
+            ORDER BY Totale DESC
+            LIMIT 3; 
+          </code></pre>
+      </figure>
+      <br>
+      <figure>
+        <figcaption>Individua tutti i possessori dei libri non ancora rientrati e il titolo degli stessi.</figcaption>
+          <pre class="sql"><code>    
+            SELECT Cliente.Nome, Cliente.Cognome, Libro.Titolo, Prestito.dataInizio
+            FROM Libro, Cliente, Prestito
+            WHERE Libro.idLibro = Prestito.idLibroP
+            AND Cliente.idCliente = Prestito.idClienteP
+            AND Prestito.dataFine < CURDATE() OR Prestito.dataFine = Null;
+          </code></pre>
+      </figure>
+      <br>
+      <figure>
+        <figcaption>Dare lo storico dei libri chiesi in prestito da un utente indicando il periodo.</figcaption>
+          <pre class="sql"><code>    
+            SELECT Libro.Titolo, Libro.Autore, Prestito.dataInizio, prestito.dataFine
+            FROM Libro, Cliente, Prestito
+            WHERE Libro.idLibro = Prestito.idLibroP
+            AND Cliente.idCliente = Prestito.idClienteP
+            AND Cliente.Nome = "Alessio"
+            AND Cliente.Cognome = "Cucinotta"
+            AND Prestito.dataInizio >= '2023-02-01'
+            AND Prestito.dataFine <= '2023-06-01';
+          </code></pre>
+      </figure>
+      <br>
+      <figure>
+        <figcaption>Fai la classifica dei libri maggiormente prestati.</figcaption>
+          <pre class="sql"><code>    
+            SELECT Libro.Titolo, Libro.Autore, COUNT(Prestito.idLibroP)
+            FROM Libro, Prestito
+            WHERE Libro.idLibro = Prestito.idLibroP
+            GROUP BY Libro.Titolo
+            HAVING COUNT(Prestito.idLibroP)
+            ORDER BY COUNT(Prestito.idLibroP);
+          </code></pre>
+      </figure>
+      <br>
+      <figure>
+        <figcaption>Individua prestiti la cui durata supera i 15gg.</figcaption>
+          <pre class="sql"><code>    
+            SELECT Prestito.idPrestito, Cliente.Cognome, Libro.Titolo
+            FROM Libro, Cliente, Prestito
+            WHERE Libro.idLibro = Prestito.idLibroP
+            AND Cliente.idCliente = Prestito.idClienteP
+            AND DATEDIFF(dataFine, dataInizio) > 15;
+          </code></pre>
+      </figure>
+      <br><br>
+    </div>
+
+</body>
+</html>

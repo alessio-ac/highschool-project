@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Esami - CGI</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rubik">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+  <script>hljs.initLineNumbersOnLoad();</script>
+  <script src="nav.js"></script>
+
+</head>
+<body>
+    <h1>Alessio Cucinotta</h1>
+    <div id="navbarContainer"></div>
+
+<div style="width: 70em; font-size: 1em">
+<h2 style="color:black; border-bottom: 1px solid #000000; text-align: left;">Script CGI per regsitro nomi</h2>
+Questo script CGI permette di inserire delle stringhe di testo in un file per poi leggerle e stamparle a schermo.<br>
+&Egrave scritto in Python per dimostrare la flessibilit&agrave delle CGI, che permetto la scrittura in qualunque linguaggio che supporta input e output
+</div> <p>
+    
+    <figure>
+      <figcaption>registro.cgi</figcaption>
+        <pre class="java"><code>    #!/usr/bin/python3
+
+    import cgi
+    
+    // Definiamo le funzioni necessarie per la scrittura e l'ottenimento dei nomi dal file
+    def writeName(name):
+        with open('/var/www/html/list.txt', 'a') as file:
+            file.write(name + "\n")
+    
+    def getNames():
+        names = []
+        with open('/var/www/html/list.txt', 'r') as file:
+            for line in file:
+                names.append(line.strip())
+        return names
+    
+    // Otteniamo il valore del nome inserito nel form
+    form = cgi.FieldStorage()
+    name = form.getvalue('name', '')
+    
+    // Scriviamo il nome nel file
+    if name:
+        writeName(name)
+    
+    // Dichiariamo una strigna contentente tutti i nomi del file
+    nameList = ""
+    names = getNames()
+    for name in names:
+        nameList += f"&ltli&gt{name}&lt/li&gt"
+    
+    print("Content-type: text/html")
+    print()
+    
+    // Stampiamo la pagina HTML di output includendo la lista {nameList}
+    print(f"""
+    &lt!DOCTYPE html&gt
+    &lthtml&gt
+    &lthead&gt
+        &lttitle&gtRegistro nomi&lt/title&gt
+    &lt/head&gt
+    &ltbody&gt
+        &lth1&gtRegistro nomi&lt/h1&gt
+        &ltform method="post" action="registro.cgi"&gt
+            &ltlabel for="name"&gtInserisci il nome:&lt/label&gt
+            &ltinput type="text" id="name" name="name"&gt
+            &ltinput type="submit" value="Save"&gt
+        &lt/form&gt
+        &lthr&gt
+        &lth2&gtNomi nel file:&lt/h2&gt
+        &ltul&gt
+            {nameList}
+        &lt/ul&gt
+    &lt/body&gt
+    &lt/html&gt
+    """)        
+        </code></pre>
+    </figure>
+</body>
+</html>
